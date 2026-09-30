@@ -1,0 +1,33 @@
+name: Aktualizace jidelnicku UTB
+
+on:
+  schedule:
+    # Spustí se každé pondělí v 5:00 ráno UTC
+    - cron: '0 5 * * 1'
+  workflow_dispatch: # Umožní spustit skript i ručně tlačítkem
+
+jobs:
+  update-menu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Načtení kódu
+        uses: actions/checkout@v3
+
+      - name: Nastavení Pythonu
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Instalace knihoven
+        run: pip install beautifulsoup4
+
+      - name: Spuštění scraperu
+        run: python scraper.py
+
+      - name: Uložení změn
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add jidelnicek.json
+          git commit -m "Automatická aktualizace jídelníčku" || exit 0
+          git push
